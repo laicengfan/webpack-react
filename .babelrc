@@ -1,0 +1,4 @@
+{
+  // react 官方预设，地址：https://github.com/facebook/create-react-app/blob/main/packages/babel-preset-react-app/create.js
+  "presets": ["react-app"]
+}
