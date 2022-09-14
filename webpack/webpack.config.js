@@ -1,6 +1,8 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const EsLintWebpackPlugin = require('eslint-webpack-plugin')
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
+
 
 // 相对路径转绝对路径
 const resolvePath = _path => path.resolve(__dirname, _path)
@@ -62,7 +64,10 @@ module.exports = {
         // 开启babel缓存
         cacheDirectory: true,
         // 关闭缓存压缩
-        cacheCompression: false
+        cacheCompression: false,
+        plugins: [
+          'react-refresh/babel'
+        ]
       }
     }]
   },
@@ -76,8 +81,8 @@ module.exports = {
       exclude:'node_modules',
       cache: true,
       cacheLocation: resolvePath('../node_modules/.cache/.eslintCache')
-    })
-    
+    }),
+    new ReactRefreshWebpackPlugin()
   ],
 
   resolve: {
@@ -86,10 +91,14 @@ module.exports = {
 
   mode: 'development',
 
+  devtool: 'cheap-module-source-map',
+
   devServer: {
     host: 'localhost',
     port: 8080,
     open: true,
     hot: true,
+    // 使用 index.html 代替所有404页面，解决使用H5的history API刷新页面导致404的问题
+    historyApiFallback: true,
   },
 }
