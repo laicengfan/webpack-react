@@ -1,11 +1,32 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const EsLintWebpackPlugin = require('eslint-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
-
 
 // 相对路径转绝对路径
 const resolvePath = _path => path.resolve(__dirname, _path)
+
+// 获取cross-env环境变量
+const isEnvProduction = process.env.NODE_ENV === 'production'
+
+const getStyleLoaders = (prevLoader) => {
+  return [
+    // 将css单独抽取成文件
+    MiniCssExtractPlugin.loader,
+    'css-loader',
+    {
+      // 处理css兼容问题
+      loader: 'postcss-loader',
+      options: {
+        postcssOptions: {
+          plugins: ['postcss-preset-env']
+        }
+      }
+    },
+    prevLoader
+  ].filter(Boolean)
+}
 
 module.exports = {
   entry: resolvePath('../src/index.tsx'),
@@ -19,24 +40,13 @@ module.exports = {
   module: {
     rules: [{
       test: /\.css$/,
-      use: [
-        'style-loader',
-        'css-loader'
-      ]
+      use: getStyleLoaders('less-loader')
     }, {
       test: /\.less$/,
-      use: [
-        'style-loader',
-        'css-loader',
-        'less-loader'
-      ]
+      use: getStyleLoaders()
     }, {
       test: /\.s[ac]ss$/,
-      use: [
-        'style-loader',
-        'css-loader',
-        'sass-loader'
-      ]
+      use: getStyleLoaders('sass-loader')
     }, {
       // 处理图片
       test: /\.(jpe?g|png|gif|webp|svg)$/,
@@ -75,6 +85,10 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: resolvePath('../public/index.html'),
+    }),
+    new MiniCssExtractPlugin({
+      filename: isEnvProduction ? 'css/[name].[contenthash:10].css' : 'css/[name].css',
+      chunkFilename: isEnvProduction ? 'css/[name].[contenthash:10].chunk.css' : 'css/[name].chunk.css',
     }),
     new EsLintWebpackPlugin({
       context: resolvePath('../src'),
